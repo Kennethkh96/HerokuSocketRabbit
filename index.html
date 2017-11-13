@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+      h1 {text-align: center;}
+      .user:hover {text-decoration: underline; cursor: pointer;}
+    </style>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="socket.io.slim.js"></script>
+  </head>
+  <body>
+      <h1>Set your username</h1>
+    <ul id="messages"></ul>
+    <form onsubmit="return false;">
+      <input id="m" autocomplete="off" /><button>Send</button>
+    </form>
+
+    <script>
+        let usersConnected = {};
+        let hasSetUsername = false;
+        let socket = io();
+        let username = "";
+        let id;
+        socket.on('new message', PrintServerMessage);
+        socket.emit("test");
+        socket.on('new connection', HandleNewConnection);
+        socket.on('disconnect', PrintServerMessage);
+        socket.on('whisper', PrintRecieveWhisperMessage);
+        socket.on('username denied', DeniedUsername);
+        socket.on('username accepted', AcceptUsername);
+
+        $('body').on('click', '.user', (arg) =>{
+            console.log("user clicked");
+            let id = arg.target.classList.item(1);
+            $('#m').val("/w " + id);
+            $('#m').focus();
+        });
+
+        $('form').submit((event) => 
+        {
+            event.preventDefault();
+            let mess = $('#m').val();
+            if (hasSetUsername)
+                HandleUserMessage(mess);
+            else
+                TrySetUsername(mess);
+
+            $('#m').val('');
+            $('#m').focus();
+            return false;
+        });
+
+        function HandleNewConnection(msg)
+        {
+            usersConnected[msg.id] = msg.username;
+            PrintServerMessage(msg);
+        }
+        function TrySetUsername(name)
+        {
+            socket.emit('set username', name);
+        }        
+        function HandleUserMessage(mess)
+        {
+            if (mess.substring(0, 2) == '/w')
+            {
+                let targetname = mess.split(' ')[1];
+                console.log(targetname);
+                let msg = mess.substring(targetname.length + 4);
+                socket.emit('whisper', {from: username, message: msg, target: targetname});
+                PrintToWhisperMessage(msg, targetname);
+                return false;
+            }
+
+            let msg = {username: username, message: mess};
+            socket.emit('message', {username: username, message: mess});
+            PrintUserMessage(msg);
+        }
+
+        function PrintUserMessage(mess)
+        {
+            usersConnected[mess.id] = mess.username;
+            $('#messages').append('<li style="color: purple;">' + mess.username + ": " + mess.message + '</li>');
+        }
+
+        function PrintRecieveWhisperMessage(mess)
+        {
+            console.log("new whisper");
+            usersConnected[mess.id] = mess.username;
+            $('#messages').append('<li style="color: blue; font-weight: bold;" class="user '+ mess.username + '">whisper from ' + mess.username + ": " + mess.message + '</li>');
+        }
+
+        function PrintToWhisperMessage(mess, targetname)
+        {
+            $('#messages').append('<li style="color: green; font-weight: bold;">whisper to ' + targetname + ": " + mess + '</li>');
+        }
+        
+        function PrintServerMessage(mess)
+        {
+            usersConnected[mess.id] = mess.username;
+            $('#messages').append('<li class="user ' + mess.username + '">' + mess.username + ": " + mess.message + '</li>');
+        }
+
+        
+        function DeniedUsername(msg)
+        {
+            alert("username is already taken");
+            $('#m').focus();
+        }
+
+        function AcceptUsername(msg)
+        {
+            $('h1').hide();
+            hasSetUsername = true;
+            username = msg.username;
+            console.log("got username: " + username);
+            PrintUserMessage({username: username, message: "has just connected!"});
+        }
+    </script>
+  </body>
+</html>
