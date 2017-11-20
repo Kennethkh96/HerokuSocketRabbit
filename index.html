@@ -18,19 +18,18 @@
     <script src="socket.io.slim.js"></script>
   </head>
   <body>
-      <h1>Set your username</h1>
-    <ul id="messages"></ul>
-    <form onsubmit="return false;">
-      <input id="m" autocomplete="off" /><button>Send</button>
-    </form>
-
     <script>
         let usersConnected = {};
         let hasSetUsername = false;
         let socket = io();
         let username = "";
         let id;
-        socket.on('new message', PrintServerMessage);
+        socket.emit('SendMail', {data: {test: 'testing', 'testt': 'testing'}, email: 'kennethkh96@gmail.com', 'template': 'test: [[test]]'});
+
+        socket.on('SendMail', (res) => {
+            console.log(res);
+        });
+        /* socket.on('new message', PrintServerMessage);
         socket.emit("test");
         socket.on('new connection', HandleNewConnection);
         socket.on('disconnect', PrintServerMessage);
@@ -123,7 +122,7 @@
             username = msg.username;
             console.log("got username: " + username);
             PrintUserMessage({username: username, message: "has just connected!"});
-        }
+        } */
     </script>
   </body>
 </html>
