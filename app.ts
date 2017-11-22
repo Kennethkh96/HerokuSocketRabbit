@@ -24,7 +24,7 @@ io.on('connection', conn => {
 
     conn.on('SendMail', mess => {
         if (mess.data === undefined || mess.template === undefined || mess.email === undefined) {
-            conn.emit('SendMail', {status: 400, result: "data, template or email was undefined"});
+            conn.emit('SendMail', {Status: 400, Result: "data, template or email was undefined"});
             return;
         }
 
@@ -34,7 +34,7 @@ io.on('connection', conn => {
             email: mess.email
         }
         send(JSON.stringify(data), 'mailtag').catch((e) => {
-            conn.emit('SendMail', {status: 500, result: ""});
+            conn.emit('SendMail', {Status: 500, Result: ""});
             return;
         });
 
@@ -43,7 +43,7 @@ io.on('connection', conn => {
 
     conn.on('GetAllTransactions', mess => {
         send('', 'lasgetalltrans').catch(e => {
-            conn.emit("GetAllTransactions", {status: 500, result: ''});
+            conn.emit("GetAllTransactions", {Status: 500, Result: ''});
             return;
         });
 
@@ -51,33 +51,33 @@ io.on('connection', conn => {
     });
 
     conn.on('GetSingleTransaction', mess => {
-        if (mess.id === undefined)
+        if (mess.Id === undefined)
         {
-            conn.emit('GetSingleTransaction', {status: 400, result: "id is required"});
+            conn.emit('GetSingleTransaction', {Status: 400, Result: "id is required"});
             return;
         }
 
-        send(mess.id, 'lasgettransaction').catch(e => {
-            conn.emit('GetSingleTransaction', {status: 500, result: ""});
+        send(JSON.stringify(mess), 'lasgettransaction').catch(e => {
+            conn.emit('GetSingleTransaction', {Status: 500, Result: ""});
             return;
-        });
+        }); 
 
         receiveAndSend(['lasgettransactionconfirmation'], conn, 'GetSingleTransaction');
     });
 
     conn.on('CreateTransaction', mess => {
         if (mess === undefined       || 
-            mess.value === undefined || 
-            mess.text === undefined  || 
-            mess.date === undefined  || 
-            mess.fk_category === undefined) 
+            mess.Value === undefined || 
+            mess.Text === undefined  || 
+            mess.Date === undefined  || 
+            mess.FK_Category === undefined) 
         {
-            conn.send('CreateTransaction', {status: 400, result: 'Missing values'});
+            conn.emit('CreateTransaction', {Status: 400, Result: 'Missing values'});
             return;
         }
 
-        send(mess, 'lascreatetransaction').catch(e => {
-            conn.emit('CreateTransaction', {status: 500, result: ""});
+        send(JSON.stringify(mess), 'lascreatetransaction').catch(e => {
+            conn.emit('CreateTransaction', {Status: 500, Result: ""});
             return;
         });
 
@@ -86,18 +86,18 @@ io.on('connection', conn => {
 
     conn.on('UpdateTransaction', mess => {
         if (mess === undefined       || 
-            mess.value === undefined || 
-            mess.text === undefined  || 
-            mess.date === undefined  || 
-            mess.id === undefined    ||
-            mess.fk_category === undefined) 
+            mess.Value === undefined || 
+            mess.Text === undefined  || 
+            mess.Date === undefined  || 
+            mess.Id === undefined    ||
+            mess.FK_Category === undefined) 
         {
-            conn.send('UpdateTransaction', {status: 400, result: 'Missing values'});
+            conn.emit('UpdateTransaction', {Status: 400, Result: 'Missing values'});
             return;
         }
 
         send(mess, 'lasupdatetransaction').catch(e => {
-            conn.send('UpdateTransaction', {status: 500, result: ""});
+            conn.emit('UpdateTransaction', {Status: 500, Result: ""});
             return;
         });
 
@@ -105,14 +105,14 @@ io.on('connection', conn => {
     });
 
     conn.on('DeleteTransaction', mess => {
-        if (mess === undefined || mess.id === undefined) 
+        if (mess === undefined || mess.Id === undefined) 
         {
-            conn.emit('DeleteTransaction', {status: 400, result: 'Missing values'});
+            conn.emit('DeleteTransaction', {Status: 400, Result: 'Missing values'});
             return;
         }
 
         send(mess, 'lasdeletetransaction').catch(e => {
-            conn.emit('DeleteTransaction', {status: 500, result: ""});
+            conn.emit('DeleteTransaction', {Status: 500, Result: ""});
             return;
         });
 
@@ -121,7 +121,7 @@ io.on('connection', conn => {
 
     conn.on('GetAllCategories', mess => {
         send('', 'lasgetallcategories').catch(e => {
-            conn.emit('GetAllCategories', {status: 500, result: ""});
+            conn.emit('GetAllCategories', {Status: 500, Result: ""});
             return;
         });
 
@@ -131,12 +131,12 @@ io.on('connection', conn => {
     conn.on('GetCategory', mess => {
         if (mess === undefined || mess.id === undefined)
         {
-            conn.emit('GetCategory', {status: 400, result: "id is required"});
+            conn.emit('GetCategory', {Status: 400, Result: "id is required"});
             return;
         }
 
         send(mess, 'lasgetcategory').catch(e => {
-            conn.emit('GetCategory', {status: 500, result: ""});
+            conn.emit('GetCategory', {Status: 500, Result: ""});
             return;
         });
 
@@ -146,12 +146,12 @@ io.on('connection', conn => {
     conn.on('CreateCategory', mess => {
         if (mess === undefined || mess.name === undefined || mess.parent === undefined)
         {
-            conn.emit('CreateCategory', {status: 400, result: "Missing values"});
+            conn.emit('CreateCategory', {Status: 400, Result: "Missing values"});
             return;
         }
 
         send(mess, 'lascreatecategory').catch(e => {
-            conn.emit('CreateCategory', {status: 500, result: ""});
+            conn.emit('CreateCategory', {Status: 500, Result: ""});
             return;
         });
 
@@ -161,12 +161,12 @@ io.on('connection', conn => {
     conn.on('UpdateCategory', mess => {
         if (mess === undefined || mess.name === undefined || mess.parent === undefined || mess.id === undefined)
         {
-            conn.emit('UpdateCategory', {status: 400, result: "Missing values"});
+            conn.emit('UpdateCategory', {Status: 400, Result: "Missing values"});
             return;
         }
 
         send(mess, 'lasupdatecategory').catch(e => {
-            conn.emit('UpdateCategory', {status: 500, result: ""});
+            conn.emit('UpdateCategory', {Status: 500, Result: ""});
             return;
         });
 
@@ -176,12 +176,12 @@ io.on('connection', conn => {
     conn.on('DeleteCategory', mess => {
         if (mess === undefined || mess.id === undefined)
         {
-            conn.emit('DeleteCategory', {status: 400, result: "Missing values"});
+            conn.emit('DeleteCategory', {Status: 400, Result: "Missing values"});
             return;
         }
 
         send(mess, 'lasdeletecategory').catch(e => {
-            conn.emit('DeleteCategory', {status: 500, result: ""});
+            conn.emit('DeleteCategory', {Status: 500, Result: ""});
             return;
         });
 
@@ -200,9 +200,13 @@ http.listen(PORT, () => {
 function receiveAndSend(severity: string[], socket: SocketIO.Socket, channel: string )
 {
     recieve(severity).then(res => {
-        socket.emit(channel, JSON.parse("" + res));
+        console.log("sending success to socket");
+        let result = JSON.parse("" + res);
+        console.log("sending: " + JSON.stringify(result, null, 4) + " to socket");
+        socket.emit(channel, result);
     }).catch(e => {
-        socket.send(channel, {status: 400, result: e});
+        console.log("sending error to socket");
+        socket.emit(channel, {Status: 400, Result: e});
     });
 }
 
@@ -236,7 +240,7 @@ function recieve(severity: string[], mode: string = 'direct', durable: boolean =
 
                 ch.assertExchange(ex, mode, { durable });
 
-                ch.assertQueue('', { exclusive: true }, function (err: any, q: any) {
+                ch.assertQueue('lasheroku', { exclusive: false }, function (err: any, q: any) {
 
                     severity.forEach(function (severityArg) {
                         ch.bindQueue(q.queue, ex, severityArg);
