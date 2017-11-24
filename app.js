@@ -17,8 +17,26 @@ app.get('/', (req, res) => {
 app.get('/socket.io.slim.js', (req, res) => {
     res.sendFile(__dirname + '/socket.io.slim.js');
 });
+let obj = {
+    data: {
+        x: 't',
+    },
+    template: 'asdsadsad [[x]]',
+    email: 'kennethkh96@gmail.com'
+};
 io.on('connection', conn => {
     console.log("new connection");
+    conn.on('GetImage', mess => {
+        if (mess === null || mess.Text === undefined) {
+            conn.emit('GetImage', { Status: 400, Result: "message or text is missing" });
+            return;
+        }
+        send(mess.Text, 'LasseImage').catch(e => {
+            conn.emit('GetImage', { Status: 500, Result: "" });
+            return;
+        });
+        receiveAndSend(['LasseImageResp'], conn, 'GetImage');
+    });
     conn.on('SendMail', mess => {
         if (mess.data === undefined || mess.template === undefined || mess.email === undefined) {
             conn.emit('SendMail', { Status: 400, Result: "data, template or email was undefined" });
