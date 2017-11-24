@@ -179,6 +179,7 @@ function receiveAndSend(severity, socket, channel) {
         socket.emit(channel, result);
     }).catch(e => {
         console.log("error");
+        console.log(e);
         console.log(JSON.stringify(e, null, 4));
         console.log("sending error to socket");
         socket.emit(channel, { Status: 400, Result: e });
